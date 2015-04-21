@@ -1,3 +1,5 @@
+$ cat .gitignore
+
 .Rproj.user
 .Rhistory
 .RData
