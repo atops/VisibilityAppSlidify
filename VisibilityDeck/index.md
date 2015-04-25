@@ -44,3 +44,4 @@ mode        : selfcontained # {standalone, draft}
 
 * Visibility changes quickly
 * There can be extended periods of low visibility
+* Example shows one ESS only, for a fixed period of time
