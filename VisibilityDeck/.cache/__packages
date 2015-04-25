@@ -1,0 +1,10 @@
+base
+slidify
+knitr
+shiny
+slidifyLibraries
+XML
+dplyr
+tidyr
+ggplot2
+lubridate

@@ -3,23 +3,83 @@ title       : Dynamic Display of Visibility Data
 subtitle    : on a 16-mile segment of freeway in 2013
 author      : atops
 job         : 
-framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+framework   : revealjs        # {io2012, html5slides, shower, dzslides, ...}
 highlighter : highlight.js  # {highlight.js, prettify, highlight}
 hitheme     : tomorrow      # 
-widgets     : []            # {mathjax, quiz, bootstrap}
+widgets     : [shiny]            # {mathjax, quiz, bootstrap}
 mode        : selfcontained # {standalone, draft}
 ---
 
-## Read-And-Delete
+## Introduction
 
-1. Edit YAML front matter
-2. Write using R Markdown
-3. Use an empty line followed by three dashes to separate slides!
+* Data
+* Application
+* Interpretation
 
 --- .class #id 
 
-## Slide 2
+## Data Source
 
+* Visibility in miles
+* By Mile marker
+* From roadside environmental sensor stations (ESS)
 
+---
 
+## Application
 
+* Shiny App
+* Select date range
+* Select one or more ESS
+
+---
+
+## Example Output
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.height=6, fig.width=12}
+#, fig.width=600, fig.height=300}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+
+df <- read.csv("../../VisibilityApp/data/2013 Visibility Data.csv", 
+               colClasses=c("character", rep("numeric",17)), 
+               na.strings="#N/A")
+
+t1 <- strftime("2013-07-01", "%Y-%m-%d") # from 12:00 am
+t2 <- strftime("2013-07-05", "%Y-%m-%d") # until 12:00 am next day
+
+# Use dplyr and tidyr packages to tidy the data and prepare for plotting.
+df <- df %>% 
+        # Remove fields we don't need.
+        select(-(Month:Serial..)) %>%
+        # blank dates = bad data
+        filter(Date...Time!="") %>% 
+        # Convert to date/time data type.
+        mutate(Date...Time = as.POSIXct(Date...Time, 
+                                        format="%m/%d/%Y %H:%M")) %>%
+        # "unpivot" (gather) MM.X.X columns into "Visibility" column
+        gather(MileMarker, Visibility, MM.1.2:MM.16.9) %>%
+        # convert feet to miles
+        mutate(Visibility_mi = Visibility/5280) %>%
+        # For example slidify deck, only show MM 6.6
+        filter(MileMarker=="MM.6.6") %>% 
+        filter(Date...Time >= t1 & Date...Time < t2)
+
+qplot(data=df, 
+        x=Date...Time, 
+        y=Visibility_mi, 
+        geom="line", 
+        ylab="Visibility (mi)",
+        xlab="Date and Time") +
+        theme(axis.text.x = element_text(size=8)) +
+        theme(axis.text.y = element_text(size=8))
+```
+
+---
+
+## Interpretation
+
+* Visibility changes quickly
+* There can be extended periods of low visibility
